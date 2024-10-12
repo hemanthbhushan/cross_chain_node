@@ -1,2 +1,10 @@
+
 /target
-/Cargo.lock
+**/*.rs.bk
+
+/target
+**/*.rs.bk
+Cargo.lock
+/.idea/
+.vscode
+con/lib
