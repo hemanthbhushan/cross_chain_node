@@ -1,0 +1,15 @@
+[package]
+name = "node_cross_chain"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.40.0", features = ["full"] }
+alloy = { version = "0.4.2", features = ["full"] }
+eyre = "0.6.12"
+futures = { version = "0.3", default-features = false }
+url = "2.5.2"
+alloy-provider = "0.4.2"
+alloy-transport-http = "0.4.2"
+reqwest = { version = "0.12", features = ["json"] }
+alloy-pubsub = "0.4.2"
