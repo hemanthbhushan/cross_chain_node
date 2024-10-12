@@ -1841,6 +1841,7 @@ dependencies = [
  "alloy-transport-http",
  "eyre",
  "futures",
+ "log",
  "reqwest",
  "tokio",
  "url",
