@@ -1,17 +1,27 @@
 mod provider_services;
-use alloy::primitives::address;
-use futures::channel::oneshot::channel;
-use provider_services::providers::{self,Transfer};
-use tokio::sync::mpsc::{self, Sender};
+mod receiver_service;
+mod sender_service;
+mod service_manager;
+use alloy::primitives::Address;
+use serde::{Deserialize, Serialize};
+use service_manager::service_manager::{Service, ServiceManager};
+use std::{fs::File, io::BufReader, io::Read};
 
-
-
+#[derive(Serialize, Deserialize, Clone)]
+struct ChainConfig {
+    source_rpc_url: String,
+    dest_rpc_url: String,
+    source_contarct_addr: Address,
+    dest_contarct_addr: Address,
+    source_event: String,
+}
 #[tokio::main]
 async fn main() {
-    let rpc_url = "wss://ethereum-rpc.publicnode.com";
-    let contract_address = address!("A0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48");
-    let event = "Transfer";
-    let (sender , receiver ) = mpsc::channel::<Transfer>(100);
-    let x = providers::initialize_provider(rpc_url, contract_address, event ,sender ).await;
-    x.start_service().await;
+    let file = File::open("config.json").unwrap();
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = String::new();
+    buf_reader.read_to_string(&mut contents).unwrap();
+    let config: ChainConfig = serde_json::from_str(&contents).unwrap();
+    let service = ServiceManager::new(config).await;
+    service.run().await
 }

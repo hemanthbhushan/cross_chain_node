@@ -1,0 +1,7 @@
+{
+	"source_rpc_url": "wss://ethereum-rpc.publicnode.com",
+	"dest_rpc_url": "wss://ethereum-rpc.publicnode.com",
+	"source_contarct_addr": "dAC17F958D2ee523a2206206994597C13D831ec7",
+	"dest_contarct_addr": "dAC17F958D2ee523a2206206994597C13D831ec7",
+	"source_event": "Transfer(address,address,uint256)"
+}
