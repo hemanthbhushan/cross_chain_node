@@ -76,16 +76,19 @@ impl Service for ReceiveService {
                             println!("in the Greater than");
                             let contract =
                                 IWETH9::new(self.contract_addr, wss_service.provider.clone());
-                            let tx = TransactionRequest::default();
 
-                            let builder = contract
-                                .provider()
-                                .send_transaction(tx)
+                            let tx_hash = contract
+                                .mapp(Uint::from(2))
+                                .send()
                                 .await
                                 .unwrap()
-                                .with_required_confirmations(2);
-                            let tx_hash = builder.watch().await.unwrap();
-                            println!("transacrtion  hash {}", tx_hash);
+                                .with_required_confirmations(2)
+                                .get_receipt()
+                                .await
+                                .unwrap();
+
+                            // let tx_hash = builder.watch().await.unwrap();
+                            println!("transacrtion  hash {:?}", tx_hash);
 
                             let total_supply = contract
                                 .mapp(x.post_message.unitValue)
