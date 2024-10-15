@@ -1,6 +1,6 @@
-use crate::provider_services::providers::{ProviderType, Transfer};
-use crate::service_manager::service_manager::Service;
-use alloy::primitives::Address;
+use crate::provider_services::providers::{PostMessage, ProviderType};
+use crate::service_manager::service_manager::{ChainType, EventData, Service};
+use alloy::primitives::{Address, Uint};
 use alloy::providers::Provider;
 use alloy::rpc::types::{BlockNumberOrTag, Filter, Log};
 use alloy_pubsub::{PubSubFrontend, Subscription};
@@ -11,7 +11,7 @@ pub struct SenderService {
     provider_type: ProviderType,
     contract_addr: Address,
     event: String,
-    sender: Sender<Transfer>,
+    sender: Sender<EventData>,
 }
 
 impl SenderService {
@@ -19,7 +19,7 @@ impl SenderService {
         provider_type: ProviderType,
         contract_addr: Address,
         event: String,
-        sender: Sender<Transfer>,
+        sender: Sender<EventData>,
     ) -> Self {
         Self {
             provider_type,
@@ -32,10 +32,11 @@ impl SenderService {
 
 impl Service for SenderService {
     async fn run(self) {
+        println!("yaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
         let filter = Filter::new()
             .address(self.contract_addr)
             .event(&self.event)
-            .from_block(BlockNumberOrTag::Number(20963632));
+            .from_block(BlockNumberOrTag::Latest);
         match &self.provider_type {
             ProviderType::Http(http_service) => {
                 let event = http_service.provider.subscribe_logs(&filter).await.unwrap();
@@ -52,15 +53,36 @@ impl Service for SenderService {
 impl SenderService {
     async fn stream_handler(&self, stream: Subscription<Log>) {
         let sender_clone = self.sender.clone();
-        println!("Im here");
-
         let x = tokio::spawn(async move {
             let mut stream = stream.into_stream();
-
+            println!("Im hereeeeeeeee");
             while let Some(log) = stream.next().await {
-                let data = log.log_decode::<Transfer>().unwrap().inner.data;
+                let data: PostMessage = log.log_decode::<PostMessage>().unwrap().inner.data;
                 println!("{:?}", data);
-                sender_clone.send(data).await.unwrap();
+                println!("Im hereeeeeeeee");
+                let check = data.toChainId.into_limbs()[0];
+                match check {
+                    1 => {
+                        sender_clone
+                            .send(EventData::new(ChainType::Ethereum, data))
+                            .await
+                            .unwrap();
+                        println!("Chain ID is 1: Ethereum Chain");
+                    }
+                    2 => {
+                        // Handle chain ID 2 (e.g., Binance Smart Chain)
+                        println!("Chain ID is 2: Binance Smart Chain");
+                        sender_clone
+                            .send(EventData::new(ChainType::BinanceSmartChain, data))
+                            .await
+                            .unwrap();
+                    }
+
+                    _ => {
+                        log::info!("Unregistered chain: {}", check);
+                        println!("Unregistered chain: {}", check);
+                    }
+                }
             }
         });
         x.await.unwrap()

@@ -6,6 +6,7 @@ use alloy::primitives::Address;
 use serde::{Deserialize, Serialize};
 use service_manager::service_manager::{Service, ServiceManager};
 use std::{fs::File, io::BufReader, io::Read};
+mod abi;
 
 #[derive(Serialize, Deserialize, Clone)]
 struct ChainConfig {
@@ -14,6 +15,7 @@ struct ChainConfig {
     source_contarct_addr: Address,
     dest_contarct_addr: Address,
     source_event: String,
+    dest_event : String
 }
 #[tokio::main]
 async fn main() {

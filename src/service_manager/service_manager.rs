@@ -1,41 +1,84 @@
-use crate::provider_services::providers::{ProviderType, Transfer};
-use crate::receiver_service::receive::ReceiveService;
-use crate::sender_service::sender::SenderService;
+use crate::provider_services::providers::{PostMessage, ProviderType};
+use crate::receiver_service::receive::{self, ReceiveService};
+use crate::sender_service::sender::{self, SenderService};
 use crate::ChainConfig;
-use tokio::sync::mpsc;
+use alloy::primitives::{address, Address};
+use tokio::sync::mpsc::{self, Sender};
 
+#[derive(Debug)]
+pub enum ChainType {
+    Ethereum,
+    BinanceSmartChain,
+}
+pub struct EventData {
+    pub chain_type: ChainType,
+    pub post_message: PostMessage,
+}
+impl EventData {
+    pub fn new(chain_type: ChainType, post_message: PostMessage) -> Self {
+        Self {
+            chain_type,
+            post_message,
+        }
+    }
+}
 pub trait Service {
     async fn run(self); // Added `&self` to make it callable on instances of a struct
 }
 pub struct ServiceManager {
-    sender: SenderService,
-    receiver: ReceiveService,
+    senders: Vec<SenderService>,
+    receivers: Vec<ReceiveService>,
 }
 
 impl ServiceManager {
     pub async fn new(config: ChainConfig) -> Self {
-        let (sender, receiver) = mpsc::channel::<Transfer>(100);
-        let provider_type = ProviderType::new(&config.source_rpc_url).await;
-        let sender = SenderService::new(
-            provider_type,
-            config.source_contarct_addr,
-            config.source_event,
-            sender,
-        );
-        let provider_type = ProviderType::new(&config.dest_rpc_url).await;
-        let receiver = ReceiveService::new(provider_type, config.dest_contarct_addr, receiver);
-        Self { sender, receiver }
+        // let (sender, receiver) = mpsc::channel::<PostMessage>(100);
+
+        let (senders, receivers) = Self::create_multiple_sender_receiver_services(
+            vec![&config.source_rpc_url, &config.dest_rpc_url],
+            vec![config.source_contarct_addr, config.dest_contarct_addr],
+            vec![config.source_event, config.dest_event],
+        )
+        .await;
+        // address!("1d2B811Eaf83630C4d2a390ebAf1bB6F4952f78e"),
+        // address!("aCc245248090A32cc8C47ba831A86a9F2aFEAc15"),
+        Self { senders, receivers }
+    }
+    //first one is source , second one is destination
+    async fn create_multiple_sender_receiver_services(
+        rpc_url: Vec<&str>,
+        contarct_addr: Vec<Address>,
+        event: Vec<String>,
+    ) -> (Vec<SenderService>, Vec<ReceiveService>) {
+        let mut i = 0;
+        let mut senders: Vec<SenderService> = vec![];
+        let mut receivers: Vec<ReceiveService> = vec![];
+        while i < rpc_url.len() {
+            let (sender, receiver) = mpsc::channel::<EventData>(100);
+            let provider_type_src = ProviderType::new(rpc_url[i]).await;
+            let sender = SenderService::new(
+                provider_type_src.clone(),
+                contarct_addr[i],
+                event[i].clone(),
+                sender.clone(),
+            );
+            let receiver = ReceiveService::new(provider_type_src, contarct_addr[i], receiver);
+            senders.push(sender);
+            receivers.push(receiver);
+            i += 1
+        }
+        return (senders, receivers);
     }
 }
 impl Service for ServiceManager {
     async fn run(self) {
         let mut handles = vec![];
-
-        let handle = tokio::spawn(async move { self.sender.run().await });
-        let handle1 = tokio::spawn(async move { self.receiver.run().await });
-
-        handles.push(handle);
-        handles.push(handle1);
+        for sender in self.senders {
+            handles.push(tokio::spawn(async move { sender.run().await }));
+        }
+        for receiver in self.receivers {
+            handles.push(tokio::spawn(async move { receiver.run().await }));
+        }
 
         for handle in handles {
             let x = handle.await.unwrap();

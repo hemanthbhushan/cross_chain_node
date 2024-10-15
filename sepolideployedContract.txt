@@ -1,0 +1,36 @@
+address : 0x1d2B811Eaf83630C4d2a390ebAf1bB6F4952f78e
+network : sepolia
+
+network : Amoy
+address :  0xaCc245248090A32cc8C47ba831A86a9F2aFEAc15
+
+Abi : [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contactAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"fromChainId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"toChainId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"unitValue","type":"uint256"}],"name":"PostMessage","type":"event"},{"inputs":[{"internalType":"uint256","name":"y","type":"uint256"},{"internalType":"string","name":"x","type":"string"}],"name":"addmapping","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"mapp","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"toChainId","type":"uint256"}],"name":"postMessage","outputs":[],"stateMutability":"nonpayable","type":"function"}] 
+contract : 
+/**
+ *Submitted for verification at Etherscan.io on 2024-10-15
+*/
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+contract MessagePoster {
+    // Define the event with the required parameters
+    event PostMessage(
+        address indexed contactAddress, // The contact address
+        uint256 fromChainId,            // The source chain ID
+        uint256 toChainId,              // The destination chain ID
+        uint256 unitValue               // The unit value
+    );
+    mapping (uint => string) public mapp;
+    uint value = 0;
+
+    function postMessage( 
+        uint256 toChainId
+    ) external {
+        emit PostMessage(address(this),block.chainid, toChainId , value+1);
+    }
+
+    function addmapping(uint y , string memory x) public  {
+        mapp[y] = x;
+    }
+}

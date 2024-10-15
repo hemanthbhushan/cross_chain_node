@@ -1836,7 +1836,6 @@ name = "node_cross_chain"
 version = "0.1.0"
 dependencies = [
  "alloy",
- "alloy-network",
  "alloy-provider",
  "alloy-pubsub",
  "alloy-sol-types",

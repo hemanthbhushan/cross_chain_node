@@ -1,7 +1,8 @@
 {
-	"source_rpc_url": "wss://ethereum-rpc.publicnode.com",
-	"dest_rpc_url": "wss://ethereum-rpc.publicnode.com",
-	"source_contarct_addr": "dAC17F958D2ee523a2206206994597C13D831ec7",
-	"dest_contarct_addr": "dAC17F958D2ee523a2206206994597C13D831ec7",
-	"source_event": "Transfer(address,address,uint256)"
+	"source_rpc_url": "wss://ethereum-sepolia-rpc.publicnode.com",
+	"dest_rpc_url": "wss://polygon-amoy.infura.io/ws/v3/5ea81e7cc25240bf8edf608fcf419532",
+	"source_contarct_addr": "0x1d2B811Eaf83630C4d2a390ebAf1bB6F4952f78e",
+	"dest_contarct_addr": "0xaCc245248090A32cc8C47ba831A86a9F2aFEAc15",
+	"source_event": "PostMessage(address,uint256,uint256,uint256)",
+	"dest_event": "PostMessage(address,uint256,uint256,uint256)"
 }

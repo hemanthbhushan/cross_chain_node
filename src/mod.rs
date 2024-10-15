@@ -1,5 +1,3 @@
-pub mod ethereum_provider;
-pub mod services;
 
 #[derive(Serialize, Deserialize, Clone)]
 struct ChainConfig {
@@ -8,4 +6,6 @@ struct ChainConfig {
     source_contarct_addr: Address,
     dest_contarct_addr: Address,
     source_event: String,
+    dest_event: String,
 }
+
