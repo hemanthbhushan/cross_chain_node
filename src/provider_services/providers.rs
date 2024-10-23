@@ -25,7 +25,7 @@ sol! {
     );
 }
 
-type WssFillers = alloy_provider::fillers::FillProvider<
+pub(crate) type WssFillers = alloy_provider::fillers::FillProvider<
     alloy_provider::fillers::JoinFill<
         alloy_provider::fillers::JoinFill<
             alloy_provider::Identity,
@@ -46,7 +46,7 @@ type WssFillers = alloy_provider::fillers::FillProvider<
     PubSubFrontend,
     alloy::network::Ethereum,
 >;
-type HttpFillers = alloy_provider::fillers::FillProvider<
+pub(crate) type HttpFillers = alloy_provider::fillers::FillProvider<
     alloy_provider::fillers::JoinFill<
         alloy_provider::fillers::JoinFill<
             alloy_provider::Identity,
@@ -89,7 +89,7 @@ pub enum ProviderType {
 impl ProviderType {
     pub async fn new(rpc_url: &str) -> Self {
         let signer: PrivateKeySigner =
-            "1d0350390ccbec7bb44d6a28bfc7f1a2189717e9627f69236d13a5f555fee176"
+            "1369d819d375b26be2ad251fe02c0d4852475450833b9878d314c105f428a5d0"
                 .parse()
                 .expect("invalid private Key");
         let wallet = EthereumWallet::from(signer);

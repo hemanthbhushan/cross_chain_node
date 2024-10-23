@@ -77,6 +77,14 @@ impl SenderService {
                             .await
                             .unwrap();
                     }
+                    80002 => {
+                        println!("Chain ID is 80002: Amoy Chain");
+                        sender_clone
+                            .send(EventData::new(ChainType::Amoy, data))
+                            .await
+                            .unwrap();
+
+                    }
 
                     _ => {
                         log::info!("Unregistered chain: {}", check);
